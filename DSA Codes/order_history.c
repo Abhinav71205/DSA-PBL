@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "cart_order.h"
 #include "inventory.h"
-
+#include "order_history.h" 
 
 void save_order_to_file(const char *username, Cart *c, Inventory *inv) {
     FILE *f = fopen("orders.txt", "a");
@@ -29,9 +30,40 @@ void save_order_to_file(const char *username, Cart *c, Inventory *inv) {
                     p->id, p->name, cur->qty, p->price, p->price * cur->qty);
         }
         cur = cur->next;
-    }
+    
     fprintf(f, "-----------------------------------------\n");
     fprintf(f, "Total: %.2f\n\n", total);
     fclose(f);
     printf("Order saved successfully for user '%s'.\n", username);
+}
+void show_order_history(const char *username) {
+    FILE *f = fopen("orders.txt", "r");
+    if (!f) {
+        printf("\nNo order history found yet.\n");
+        return;
+    }
+    char line[300];
+    int found = 0;
+    int print = 0;
+    printf("\n========== ORDER HISTORY for %s ==========\n", username);
+    while (fgets(line, sizeof(line), f)) {
+        if (strstr(line, "User: ") && strstr(line, username)) {
+            found = 1;
+            print = 1;
+            printf("\n%s", line);
+            continue;
+        }        
+        if (print) {
+            if (strstr(line, "User: ") && !strstr(line, username)) {                
+                print = 0;
+            } else {
+                printf("%s", line);
+            }
+        }
+    }
+    if (!found) {
+        printf("\nNo orders found for user '%s'.\n", username);
+    }
+    fclose(f);
+    printf("\n==========================================\n");
 }
