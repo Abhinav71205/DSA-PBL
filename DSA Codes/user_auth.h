@@ -1,7 +1,6 @@
 #ifndef USER_AUTH_H
 #define USER_AUTH_H
-
-#define USER_FILE "C:\\Users\\Abhinav\\Desktop\\users.txt"  
+#define USER_FILE "users.txt"
 #define USERNAME_LEN 50
 #define PASSWORD_LEN 50
 
@@ -10,7 +9,7 @@ typedef struct {
     int is_logged_in;
 } UserSession;
 
+int signup_user();
 int login_user(UserSession *session);
 void logout_user(UserSession *session);
-
 #endif
