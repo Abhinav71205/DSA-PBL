@@ -10,8 +10,6 @@ typedef struct Product {
     int qty;
     struct Product *next;
 } Product;
-
 Product* create_product(int id, const char *name, float price, int qty);
 void free_product(Product *p);
-
 #endif 
