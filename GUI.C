@@ -1,28 +1,23 @@
 #define _WIN32_IE 0x0500
 #define _WIN32_WINNT 0x0500
 #define WINVER 0x0500
-
 #include <windows.h>
 #include <commctrl.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #ifndef USER_FILE
 #define USER_FILE "users.txt"
 #endif
-
 #ifndef ADMIN_FILE
 #define ADMIN_FILE "admins.txt"
 #endif
-
 #include "user_auth.h"
 #include "admin_auth.h"
 #include "inventory.h"
 #include "cart_order.h"
 #include "billing.h"
 #include "order_history.h"
-
 #define ID_BTN_USER     1001
 #define ID_BTN_ADMIN    1002
 #define ID_EDT_USER     1101
@@ -30,20 +25,17 @@
 #define ID_BTN_LOGIN    1103
 #define ID_BTN_SIGNUP   1104
 #define ID_BTN_BACK     1105
-
 #define ID_U_BROWSE     1201
 #define ID_U_ADD        1202
 #define ID_U_VIEWCART   1203
 #define ID_U_CHECKOUT   1204
 #define ID_U_HISTORY    1205
 #define ID_U_LOGOUT     1299
-
 #define ID_BACK_BROWSE  1400
 #define ID_BACK_CART    1401
 #define ID_BACK_HISTORY 1402
 #define ID_BACK_ADD     1403
 #define ID_ADD_CONFIRM  1404
-
 #define ID_ADMIN_LIST   2001
 #define ID_ADMIN_ADD    2002
 #define ID_ADMIN_UPDATE 2003
@@ -51,17 +43,14 @@
 #define ID_ADMIN_SAVE   2005
 #define ID_ADMIN_LOGOUT 2006
 #define ID_ADMIN_BACK   2007
-
 #define ID_ADMIN_ADD_CONFIRM    2101
 #define ID_ADMIN_UPDATE_CONFIRM 2102
 #define ID_ADMIN_REMOVE_CONFIRM 2103
-
 static int g_isAdmin = 0;
 static char g_username[64] = "";
 
 Inventory inv;
 Cart cart;
-
 LRESULT CALLBACK MainProc(HWND, UINT, WPARAM, LPARAM);
 
 void ShowMainMenu(HWND);
@@ -77,14 +66,12 @@ void ShowAdminAddProduct(HWND);
 void ShowAdminUpdateQty(HWND);
 void ShowAdminRemoveProduct(HWND);
 void ClearChildren(HWND);
-
 static void trim_crlf(char *s) {
     if (!s) return;
     size_t n = strlen(s);
     while (n>0 && (s[n-1]=='\n' || s[n-1]=='\r' || s[n-1]==' ' || s[n-1]=='\t')) { s[n-1]=0; n--; }
     while (*s && (*s==' ' || *s=='\t')) { memmove(s,s+1,strlen(s)); }
 }
-
 static int username_exists_in_file(const char *file, const char *username) {
     FILE *f = fopen(file, "r");
     if (!f) return 0;
@@ -97,11 +84,9 @@ static int username_exists_in_file(const char *file, const char *username) {
     fclose(f);
     return found;
 }
-
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR args, int ncmdshow) {
     INITCOMMONCONTROLSEX icex = { sizeof(INITCOMMONCONTROLSEX), ICC_LISTVIEW_CLASSES };
     InitCommonControlsEx(&icex);
-
     WNDCLASSA wc = {0};
     wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
@@ -109,27 +94,22 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR args, int ncmdshow) {
     wc.lpszClassName = "EComSystem";
     wc.lpfnWndProc = MainProc;
     if(!RegisterClassA(&wc)) return -1;
-
     init_inventory(&inv);
     load_inventory_from_file(&inv, "products.txt");
     init_cart(&cart);
-
     CreateWindowA("EComSystem", "E-Commerce System",
                   WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                   520, 240, 520, 420, NULL, NULL, hInst, NULL);
-
     MSG msg;
     while(GetMessage(&msg,NULL,0,0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
     save_inventory_to_file(&inv, "products.txt");
     clear_cart(&cart);
     free_inventory(&inv);
     return 0;
 }
-
 void ClearChildren(HWND hwnd) {
     HWND child = GetWindow(hwnd, GW_CHILD);
     while(child) {
@@ -138,7 +118,6 @@ void ClearChildren(HWND hwnd) {
         child = next;
     }
 }
-
 void ShowMainMenu(HWND hwnd) {
     ClearChildren(hwnd);
     CreateWindowA("static", "Welcome to E-Commerce System",
@@ -151,7 +130,6 @@ void ShowMainMenu(HWND hwnd) {
                   WS_VISIBLE|WS_CHILD,
                   160, 160, 200, 40, hwnd, (HMENU)ID_BTN_ADMIN, NULL, NULL);
 }
-
 void ShowLogin(HWND hwnd, int isAdmin) {
     ClearChildren(hwnd);
     g_isAdmin = isAdmin;
@@ -176,7 +154,6 @@ void ShowLogin(HWND hwnd, int isAdmin) {
                   WS_VISIBLE|WS_CHILD,
                   20, 20, 60, 26, hwnd, (HMENU)ID_BTN_BACK, NULL, NULL);
 }
-
 void ShowUserDash(HWND hwnd) {
     ClearChildren(hwnd);
     char header[128];
@@ -196,7 +173,6 @@ void ShowUserDash(HWND hwnd) {
     CreateWindowA("button", "Logout", WS_VISIBLE|WS_CHILD,
                   160, 310, 200, 36, hwnd, (HMENU)ID_U_LOGOUT, NULL, NULL);
 }
-
 void ShowAdminDash(HWND hwnd) {
     ClearChildren(hwnd);
     char header[128];
@@ -214,86 +190,68 @@ void ShowAdminDash(HWND hwnd) {
     CreateWindowA("button", "Save & Exit", WS_VISIBLE|WS_CHILD,
                   160, 264, 200, 36, hwnd, (HMENU)ID_ADMIN_SAVE, NULL, NULL);
 }
-
 void ShowProductList(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
                   20, 20, 60, 26, hwndParent, (HMENU)ID_BACK_BROWSE, NULL, NULL);
-
     HWND list = CreateWindowExA(WS_EX_CLIENTEDGE, WC_LISTVIEW, "",
         WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SINGLESEL,
         30, 60, 440, 250, hwndParent, NULL, NULL, NULL);
-
     LVCOLUMNA col = {0};
     col.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM;
     col.pszText = "ID"; col.cx = 60; ListView_InsertColumn(list, 0, &col);
     col.pszText = "Name"; col.cx = 150; ListView_InsertColumn(list, 1, &col);
     col.pszText = "Price"; col.cx = 100; ListView_InsertColumn(list, 2, &col);
     col.pszText = "Qty"; col.cx = 80; ListView_InsertColumn(list, 3, &col);
-
     int index = 0;
     Product *cur = inv.head;
     char buf[64];
-
     while (cur) {
         LVITEMA item = {0};
         item.mask = LVIF_TEXT;
         item.iItem = index;
-
         sprintf(buf, "%d", cur->id);
         item.pszText = buf;
         ListView_InsertItem(list, &item);
-
         ListView_SetItemText(list, index, 1, cur->name);
         sprintf(buf, "%.2f", cur->price);
         ListView_SetItemText(list, index, 2, buf);
         sprintf(buf, "%d", cur->qty);
         ListView_SetItemText(list, index, 3, buf);
-
         cur = cur->next;
         index++;
     }
 }
-
 void ShowAddToCartWindow(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
                   20, 20, 60, 26, hwndParent, (HMENU)ID_BACK_ADD, NULL, NULL);
-
     CreateWindowA("static", "Product ID:", WS_VISIBLE|WS_CHILD,
                   120, 120, 120, 24, hwndParent, NULL, NULL, NULL);
     CreateWindowA("edit", "", WS_VISIBLE|WS_CHILD|WS_BORDER,
                   240, 120, 160, 24, hwndParent, (HMENU)201, NULL, NULL);
-
     CreateWindowA("static", "Quantity:", WS_VISIBLE|WS_CHILD,
                   120, 160, 120, 24, hwndParent, NULL, NULL, NULL);
     CreateWindowA("edit", "", WS_VISIBLE|WS_CHILD|WS_BORDER,
                   240, 160, 160, 24, hwndParent, (HMENU)202, NULL, NULL);
-
     CreateWindowA("button", "Add to Cart", WS_VISIBLE|WS_CHILD,
                   190, 210, 140, 32, hwndParent, (HMENU)ID_ADD_CONFIRM, NULL, NULL);
 }
-
 void ShowCartWindow(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
                   20, 20, 60, 26, hwndParent, (HMENU)ID_BACK_CART, NULL, NULL);
-
     HWND list = CreateWindowExA(WS_EX_CLIENTEDGE, WC_LISTVIEW, "",
         WS_VISIBLE|WS_CHILD|LVS_REPORT|LVS_SINGLESEL,
         30, 60, 440, 250, hwndParent, NULL, NULL, NULL);
-
     LVCOLUMNA col = {0};
     col.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;
-
     col.pszText = "Product"; col.cx = 150; ListView_InsertColumn(list, 0, &col);
     col.pszText = "Qty"; col.cx = 80; ListView_InsertColumn(list, 1, &col);
     col.pszText = "Total Price"; col.cx = 100; ListView_InsertColumn(list, 2, &col);
-
     int index = 0;
     CartItem *cur = cart.head;
     char buf[64];
-
     while (cur) {
         Product *p = find_product_by_id(&inv, cur->product_id);
         if (p) {
@@ -311,12 +269,10 @@ void ShowCartWindow(HWND hwndParent) {
         cur = cur->next;
     }
 }
-
 void ShowHistoryWindow(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
                   20, 20, 60, 26, hwndParent, (HMENU)ID_BACK_HISTORY, NULL, NULL);
-
     HWND list = CreateWindowExA(WS_EX_CLIENTEDGE, WC_LISTVIEW, "",
         WS_VISIBLE|WS_CHILD|LVS_REPORT|WS_VSCROLL,
         30, 60, 440, 250, hwndParent, NULL, NULL, NULL);
@@ -324,16 +280,13 @@ void ShowHistoryWindow(HWND hwndParent) {
     LVCOLUMNA col = {0};
     col.mask = LVCF_TEXT|LVCF_WIDTH;
     col.pszText = "Order History"; col.cx = 420; ListView_InsertColumn(list, 0, &col);
-
     FILE *f = fopen("orders.txt", "r");
     if (!f) {
         MessageBoxA(hwndParent, "No order history yet.", "Info", MB_OK);
         return;
     }
-
     char line[300];
     int show = 0, index = 0;
-
     while (fgets(line, sizeof(line), f)) {
         if (strstr(line, "User: ") && strstr(line, g_username)) {
             show = 1;
@@ -360,27 +313,22 @@ void ShowHistoryWindow(HWND hwndParent) {
             }
         }
     }
-
     fclose(f);
     if (index == 0) MessageBoxA(hwndParent, "No previous orders found.", "Info", MB_OK);
 }
-
 void ShowAdminListProducts(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
                   20, 20, 60, 28, hwndParent, (HMENU)ID_ADMIN_BACK, NULL, NULL);
-
     HWND list = CreateWindowExA(WS_EX_CLIENTEDGE, WC_LISTVIEW, "",
         WS_VISIBLE|WS_CHILD|LVS_REPORT|LVS_SINGLESEL,
         30, 60, 440, 260, hwndParent, NULL, NULL, NULL);
-
     LVCOLUMNA col = {0};
     col.mask = LVCF_TEXT|LVCF_WIDTH;
     col.pszText = "ID"; col.cx = 60; ListView_InsertColumn(list, 0, &col);
     col.pszText = "Name"; col.cx = 150; ListView_InsertColumn(list, 1, &col);
     col.pszText = "Price"; col.cx = 100; ListView_InsertColumn(list, 2, &col);
     col.pszText = "Qty"; col.cx = 80; ListView_InsertColumn(list, 3, &col);
-
     int index = 0;
     Product *cur = inv.head;
     char buf[64];
@@ -400,7 +348,6 @@ void ShowAdminListProducts(HWND hwndParent) {
         index++;
     }
 }
-
 void ShowAdminAddProduct(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
@@ -424,7 +371,6 @@ void ShowAdminAddProduct(HWND hwndParent) {
     CreateWindowA("button", "Add Product", WS_VISIBLE|WS_CHILD,
                   180, 260, 160, 32, hwndParent, (HMENU)ID_ADMIN_ADD_CONFIRM, NULL, NULL);
 }
-
 void ShowAdminUpdateQty(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
@@ -440,7 +386,6 @@ void ShowAdminUpdateQty(HWND hwndParent) {
     CreateWindowA("button", "Update Qty", WS_VISIBLE|WS_CHILD,
                   200, 210, 140, 32, hwndParent, (HMENU)ID_ADMIN_UPDATE_CONFIRM, NULL, NULL);
 }
-
 void ShowAdminRemoveProduct(HWND hwndParent) {
     ClearChildren(hwndParent);
     CreateWindowA("button", "Back", WS_VISIBLE|WS_CHILD,
@@ -452,7 +397,6 @@ void ShowAdminRemoveProduct(HWND hwndParent) {
     CreateWindowA("button", "Remove", WS_VISIBLE|WS_CHILD,
                   200, 190, 140, 32, hwndParent, (HMENU)ID_ADMIN_REMOVE_CONFIRM, NULL, NULL);
 }
-
 LRESULT CALLBACK MainProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     static char u[128], p[128];
     switch(msg) {
