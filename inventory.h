@@ -6,7 +6,6 @@ typedef struct Inventory {
     Product *head;
     int size;
 } Inventory;
-
 void init_inventory(Inventory *inv);
 void load_inventory_from_file(Inventory *inv, const char *filename);
 void save_inventory_to_file(Inventory *inv, const char *filename);
