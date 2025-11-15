@@ -3,7 +3,6 @@
 #include <string.h>
 #include "inventory.h"
 #include "admin_auth.h"
-
 void admin_menu(Inventory *inv, const char *filename) {
     int ch;
     while (1) {
