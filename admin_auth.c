@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "admin_auth.h"
-
 int admin_signup() {
     char username[ADMIN_USERNAME_LEN], password[ADMIN_PASSWORD_LEN];
     printf("\n--- ADMIN SIGN UP ---\n");
